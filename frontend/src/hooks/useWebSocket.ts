@@ -19,8 +19,8 @@ export function useWebSocket() {
     if (wsRef.current?.readyState === WebSocket.OPEN) return;
 
     const { access } = JSON.parse(tokens);
-    const baseUrl =
-      process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8000/ws/notifications/";
+    const defaultWsUrl = `ws://${window.location.host}/ws/notifications/`;
+    const baseUrl = process.env.NEXT_PUBLIC_WS_URL || defaultWsUrl;
     const wsUrl = `${baseUrl}?token=${access}`;
 
     const ws = new WebSocket(wsUrl);

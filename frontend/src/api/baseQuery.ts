@@ -6,7 +6,7 @@ import type {
 } from "@reduxjs/toolkit/query";
 
 const rawBaseQuery = fetchBaseQuery({
-  baseUrl: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000",
+  baseUrl: process.env.NEXT_PUBLIC_API_URL || "",
   prepareHeaders: (headers) => {
     const tokens = localStorage.getItem("tokens");
     if (tokens) {

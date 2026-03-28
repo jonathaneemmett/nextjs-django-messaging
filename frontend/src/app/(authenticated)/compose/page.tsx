@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { useSendMessageMutation } from "@/api/messagesApi";
 
 const composeSchema = z.object({
-  recipient: z.coerce.number().positive("Recipient is required"),
+  recipient: z.string().min(1, "Recipient is required"),
   subject: z.string().min(1, "Subject is required"),
   body: z.string().min(1, "Message body is required"),
 });
@@ -28,7 +28,11 @@ export default function ComposePage() {
 
   const onSubmit = async (data: ComposeForm) => {
     try {
-      await sendMessage(data).unwrap();
+      await sendMessage({
+        recipient: parseInt(data.recipient, 10),
+        subject: data.subject,
+        body: data.body,
+      }).unwrap();
       router.push("/sent");
     } catch {
       // Error handled by RTK Query
