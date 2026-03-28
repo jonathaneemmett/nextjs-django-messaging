@@ -141,35 +141,67 @@ These default to `localhost:8000` if not set.
 
 ## Production Deployment
 
-### With Docker Compose
+### Prerequisites
 
-1. Copy `.env.example` to `.env` and fill in the values:
+- A VPS or server with Docker and Docker Compose installed
+- A domain name pointed at the server (optional but recommended for HTTPS)
+
+### 1. Clone and configure
 
 ```bash
+git clone <your-repo-url>
+cd django-messaging
 cp .env.example .env
-# Generate secrets:
-python -c "import secrets; print(secrets.token_urlsafe(50))"
 ```
 
-2. Build and start:
+Edit `.env` with your values. Generate secrets with:
+
+```bash
+python3 -c "import secrets; print(secrets.token_urlsafe(50))"
+```
+
+**Required `.env` variables:**
+
+| Variable | Description |
+|----------|-------------|
+| `SECRET_KEY` | Django secret key (generate with command above) |
+| `JWT_SIGNING_KEY` | JWT signing key (generate a separate one) |
+| `POSTGRES_PASSWORD` | Database password |
+| `ALLOWED_HOSTS` | Your domain, e.g. `yourdomain.com` |
+| `CORS_ALLOWED_ORIGINS` | Frontend origin, e.g. `https://yourdomain.com` |
+| `NEXT_PUBLIC_API_URL` | API URL, e.g. `https://yourdomain.com` |
+| `NEXT_PUBLIC_WS_URL` | WebSocket URL, e.g. `wss://yourdomain.com/ws/notifications/` |
+
+**Optional `.env` variables:**
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `POSTGRES_DB` | `messaging` | Database name |
+| `POSTGRES_USER` | `messaging` | Database user |
+| `SECURE_SSL_REDIRECT` | `False` | Set to `True` when HTTPS is configured |
+| `SECURE_HSTS_SECONDS` | `0` | Set to `31536000` when HTTPS is confirmed working |
+
+### 2. Build and start
 
 ```bash
 docker compose up -d --build
 ```
 
-3. Run migrations and create a superuser:
+### 3. Initialize the database
 
 ```bash
 docker compose exec backend python manage.py migrate
 docker compose exec backend python manage.py createsuperuser
 ```
 
-The app is available at `http://localhost` (port 80).
+### 4. Verify
+
+Open `http://your-server-ip` (or your domain). You should see the login page.
 
 ### Architecture
 
 ```
-nginx (port 80)
+nginx (port 80/443)
 ├── /ws/*          → backend (Uvicorn, 4 workers)
 ├── /api/*         → backend
 ├── /admin/*       → backend
@@ -178,6 +210,85 @@ nginx (port 80)
 backend → PostgreSQL, Redis
 ```
 
-### HTTPS
+All containers are internal except nginx, which is the only one exposed to the outside.
 
-The nginx config serves HTTP on port 80. For production with HTTPS, add Certbot/Let's Encrypt and update nginx to listen on 443 with your SSL certificates. Update `.env` URLs to use `https://` and `wss://`.
+### Managing the deployment
+
+```bash
+# View logs
+docker compose logs -f              # all services
+docker compose logs -f backend      # backend only
+
+# Restart a service
+docker compose restart backend
+
+# Stop everything
+docker compose down
+
+# Stop and remove data (including database)
+docker compose down -v
+
+# Rebuild after code changes
+docker compose up -d --build
+
+# Run a Django management command
+docker compose exec backend python manage.py <command>
+
+# Create additional users
+docker compose exec backend python manage.py createsuperuser
+```
+
+### HTTPS with Let's Encrypt
+
+Once you have a domain pointed at your server:
+
+1. Install Certbot on the host (not in Docker):
+
+```bash
+sudo apt install certbot
+sudo certbot certonly --standalone -d yourdomain.com
+```
+
+2. Update `nginx/nginx.conf` to listen on 443 with the certificates:
+
+```nginx
+server {
+    listen 80;
+    server_name yourdomain.com;
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    server_name yourdomain.com;
+
+    ssl_certificate /etc/letsencrypt/live/yourdomain.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/yourdomain.com/privkey.pem;
+
+    # ... existing location blocks ...
+}
+```
+
+3. Mount the certificates in `docker-compose.yml` under the nginx service:
+
+```yaml
+volumes:
+  - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+  - /etc/letsencrypt:/etc/letsencrypt:ro
+```
+
+4. Update `.env`:
+
+```
+CORS_ALLOWED_ORIGINS=https://yourdomain.com
+NEXT_PUBLIC_API_URL=https://yourdomain.com
+NEXT_PUBLIC_WS_URL=wss://yourdomain.com/ws/notifications/
+SECURE_SSL_REDIRECT=True
+SECURE_HSTS_SECONDS=31536000
+```
+
+5. Rebuild:
+
+```bash
+docker compose up -d --build
+```
