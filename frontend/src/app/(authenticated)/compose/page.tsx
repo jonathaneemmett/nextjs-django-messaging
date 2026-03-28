@@ -37,7 +37,7 @@ export default function ComposePage() {
 
   return (
     <div className="flex flex-col h-full bg-white">
-      <div className="flex items-center gap-3 px-6 py-4 border-b border-gray-200">
+      <div className="flex items-center gap-3 px-3 md:px-6 py-3 md:py-4 border-b border-gray-200">
         <h2 className="text-lg font-semibold text-gray-900">New Message</h2>
       </div>
 
@@ -45,7 +45,7 @@ export default function ComposePage() {
         onSubmit={handleSubmit(onSubmit)}
         className="flex-1 flex flex-col"
       >
-        <div className="border-b border-gray-100 px-6 py-3">
+        <div className="border-b border-gray-100 px-3 md:px-6 py-3">
           <div className="flex items-center gap-3">
             <label
               htmlFor="recipient"
@@ -68,7 +68,7 @@ export default function ComposePage() {
           )}
         </div>
 
-        <div className="border-b border-gray-100 px-6 py-3">
+        <div className="border-b border-gray-100 px-3 md:px-6 py-3">
           <div className="flex items-center gap-3">
             <label
               htmlFor="subject"
@@ -91,7 +91,7 @@ export default function ComposePage() {
           )}
         </div>
 
-        <div className="flex-1 px-6 py-4">
+        <div className="flex-1 px-3 md:px-6 py-4">
           <textarea
             {...register("body")}
             placeholder="Write your message..."
@@ -110,7 +110,7 @@ export default function ComposePage() {
           </div>
         )}
 
-        <div className="flex items-center gap-2 px-6 py-3 border-t border-gray-200">
+        <div className="flex items-center gap-2 px-3 md:px-6 py-3 border-t border-gray-200">
           <button
             type="submit"
             disabled={isLoading}

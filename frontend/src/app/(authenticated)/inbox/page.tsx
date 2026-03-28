@@ -55,10 +55,10 @@ export default function InboxPage() {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex items-center gap-3 px-6 py-4 bg-white border-b border-gray-200">
-        <h2 className="text-lg font-semibold text-gray-900">Inbox</h2>
+      <div className="flex items-center gap-3 px-3 md:px-6 py-3 md:py-4 bg-white border-b border-gray-200">
+        <h2 className="text-base md:text-lg font-semibold text-gray-900">Inbox</h2>
         {data && (
-          <span className="text-xs text-gray-400 font-medium">
+          <span className="text-xs text-gray-400 font-medium hidden sm:inline">
             {data.count} message{data.count !== 1 ? "s" : ""}
           </span>
         )}
@@ -84,13 +84,13 @@ export default function InboxPage() {
               setSearch(e.target.value);
               setPage(1);
             }}
-            className="w-48 rounded-lg border border-gray-200 bg-gray-50 pl-8 pr-3 py-1.5 text-sm text-gray-700 placeholder-gray-400 focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-400 transition-colors"
+            className="w-32 sm:w-48 rounded-lg border border-gray-200 bg-gray-50 pl-8 pr-3 py-1.5 text-sm text-gray-700 placeholder-gray-400 focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-400 transition-colors"
           />
         </div>
       </div>
 
       {selected.length > 0 && (
-        <div className="flex items-center gap-3 px-6 py-2 bg-blue-50 border-b border-blue-100">
+        <div className="flex items-center gap-3 px-3 md:px-6 py-2 bg-blue-50 border-b border-blue-100">
           <span className="text-xs font-medium text-blue-700">
             {selected.length} selected
           </span>
@@ -136,7 +136,7 @@ export default function InboxPage() {
             {messages.map((message) => (
               <div
                 key={message.id}
-                className={`flex items-center gap-3 px-6 py-3 hover:bg-white transition-colors cursor-pointer group ${
+                className={`flex items-center gap-2 md:gap-3 px-3 md:px-6 py-3 hover:bg-white transition-colors cursor-pointer group ${
                   !message.is_read ? "bg-white" : ""
                 }`}
               >
@@ -151,7 +151,7 @@ export default function InboxPage() {
                 )}
                 {message.is_read && <span className="h-2 w-2 flex-shrink-0" />}
                 <span
-                  className={`w-32 truncate text-sm flex-shrink-0 ${
+                  className={`w-20 md:w-32 truncate text-sm flex-shrink-0 ${
                     !message.is_read
                       ? "font-semibold text-gray-900"
                       : "text-gray-600"
@@ -184,7 +184,7 @@ export default function InboxPage() {
                     archiveMessage(message.id);
                   }}
                   title="Archive"
-                  className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-gray-600 transition-opacity flex-shrink-0"
+                  className="hidden md:block opacity-0 group-hover:opacity-100 text-gray-400 hover:text-gray-600 transition-opacity flex-shrink-0"
                 >
                   <svg
                     className="w-4 h-4"
@@ -200,7 +200,7 @@ export default function InboxPage() {
                     />
                   </svg>
                 </button>
-                <span className="text-xs text-gray-400 w-16 text-right flex-shrink-0">
+                <span className="text-xs text-gray-400 w-12 md:w-16 text-right flex-shrink-0">
                   {formatDate(message.created_at)}
                 </span>
               </div>
@@ -210,7 +210,7 @@ export default function InboxPage() {
       )}
 
       {data && (data.next || data.previous) && (
-        <div className="flex items-center justify-between px-6 py-3 bg-white border-t border-gray-200">
+        <div className="flex items-center justify-between px-3 md:px-6 py-3 bg-white border-t border-gray-200">
           <button
             disabled={!data.previous}
             onClick={() => setPage((p) => p - 1)}

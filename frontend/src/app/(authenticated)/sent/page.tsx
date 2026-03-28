@@ -21,7 +21,7 @@ export default function SentPage() {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex items-center gap-3 px-6 py-4 bg-white border-b border-gray-200">
+      <div className="flex items-center gap-3 px-3 md:px-6 py-3 md:py-4 bg-white border-b border-gray-200">
         <h2 className="text-lg font-semibold text-gray-900">Sent</h2>
         {data && (
           <span className="text-xs text-gray-400 font-medium">
@@ -53,15 +53,15 @@ export default function SentPage() {
             {messages.map((message) => (
               <div
                 key={message.id}
-                className="flex items-center gap-3 px-6 py-3 hover:bg-white transition-colors"
+                className="flex items-center gap-2 md:gap-3 px-3 md:px-6 py-3 hover:bg-white transition-colors"
               >
-                <span className="w-32 truncate text-sm text-gray-600 flex-shrink-0">
+                <span className="w-20 md:w-32 truncate text-sm text-gray-600 flex-shrink-0">
                   To: User {message.recipient}
                 </span>
                 <span className="flex-1 truncate text-sm text-gray-700">
                   {message.subject}
                 </span>
-                <span className="text-xs text-gray-400 w-16 text-right flex-shrink-0">
+                <span className="text-xs text-gray-400 w-12 md:w-16 text-right flex-shrink-0">
                   {formatDate(message.created_at)}
                 </span>
               </div>
