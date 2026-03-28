@@ -3,6 +3,8 @@ __pycache__/
 *.pyc
 db.sqlite3
 .env
+.env.local
+.env.production
 *.egg-info/
 ROADMAP.md
 ROOTFINDINGS.md

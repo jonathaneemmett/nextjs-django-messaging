@@ -138,3 +138,46 @@ NEXT_PUBLIC_WS_URL=ws://localhost:8000/ws/notifications/
 ```
 
 These default to `localhost:8000` if not set.
+
+## Production Deployment
+
+### With Docker Compose
+
+1. Copy `.env.example` to `.env` and fill in the values:
+
+```bash
+cp .env.example .env
+# Generate secrets:
+python -c "import secrets; print(secrets.token_urlsafe(50))"
+```
+
+2. Build and start:
+
+```bash
+docker compose up -d --build
+```
+
+3. Run migrations and create a superuser:
+
+```bash
+docker compose exec backend python manage.py migrate
+docker compose exec backend python manage.py createsuperuser
+```
+
+The app is available at `http://localhost` (port 80).
+
+### Architecture
+
+```
+nginx (port 80)
+├── /ws/*          → backend (Uvicorn, 4 workers)
+├── /api/*         → backend
+├── /admin/*       → backend
+└── /*             → frontend (Next.js standalone)
+
+backend → PostgreSQL, Redis
+```
+
+### HTTPS
+
+The nginx config serves HTTP on port 80. For production with HTTPS, add Certbot/Let's Encrypt and update nginx to listen on 443 with your SSL certificates. Update `.env` URLs to use `https://` and `wss://`.
