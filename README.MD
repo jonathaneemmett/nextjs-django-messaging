@@ -7,12 +7,63 @@ A real-time one-way messaging system with a Django backend and Next.js frontend.
 ```
 django-messaging/
 ├── backend/     Django + Channels + DRF
-└── frontend/    Next.js (coming soon)
+├── frontend/    Next.js + RTK Query + Tailwind
+└── docker-compose.yml
 ```
 
 **Backend** — Django REST API for creating, listing, filtering, archiving, and deleting messages. Django Channels pushes new messages to recipients over WebSocket in real time. Unread messages are delivered on reconnect.
 
-**Frontend** — Next.js app with a mail-like inbox UI. Connects to the backend via REST API and WebSocket.
+**Frontend** — Next.js App Router with a mail-like inbox UI. RTK Query for data fetching, JWT auth, and a real-time WebSocket connection for instant message delivery.
+
+## Prerequisites
+
+- Python 3.12+
+- Node.js 18+
+- Docker (for PostgreSQL and Redis)
+
+## Quick Start
+
+You need three terminals running.
+
+### Terminal 1 — Services (PostgreSQL + Redis)
+
+```bash
+docker compose up -d
+```
+
+### Terminal 2 — Backend
+
+```bash
+cd backend
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py createsuperuser
+uvicorn config.asgi:application --reload
+```
+
+The API is available at `http://localhost:8000`.
+
+### Terminal 3 — Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+The UI is available at `http://localhost:3000`.
+
+### Create a Second User
+
+You need at least two users to send messages between them:
+
+```bash
+cd backend
+source venv/bin/activate
+python manage.py createsuperuser
+```
 
 ## Backend
 
@@ -21,41 +72,11 @@ django-messaging/
 - Django 6.x + Django Channels 4.x (ASGI, WebSocket)
 - Django REST Framework + SimpleJWT
 - PostgreSQL
-- Redis (channel layer)
+- Redis (channel layer via channels_redis)
 - Uvicorn (ASGI server)
-- structlog (logging)
-
-### Prerequisites
-
-- Python 3.12+
-- Docker (for PostgreSQL and Redis)
-
-### Setup
-
-```bash
-cd backend
-
-# Start PostgreSQL and Redis
-docker compose -f ../docker-compose.yml up -d
-
-# Create virtual environment
-python3 -m venv venv
-source venv/bin/activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Run migrations
-python manage.py migrate
-
-# Create a superuser
-python manage.py createsuperuser
-
-# Start the server
-uvicorn config.asgi:application --reload
-```
-
-The API is available at `http://localhost:8000`.
+- structlog + django-structlog (logging)
+- django-filter (search and filtering)
+- django-cors-headers
 
 ### API Endpoints
 
@@ -76,7 +97,7 @@ All endpoints require authentication. Include `Authorization: Bearer <token>` he
 
 ### WebSocket
 
-Connect to `ws://localhost:8000/ws/notifications/` with a valid session cookie. New messages are pushed in real time. Unread messages are delivered on connect.
+Connect to `ws://localhost:8000/ws/notifications/?token=<access_token>`. New messages are pushed in real time. Unread messages are delivered on connect. The frontend handles this automatically.
 
 ### Running Tests
 
@@ -85,3 +106,35 @@ cd backend
 source venv/bin/activate
 pytest
 ```
+
+## Frontend
+
+### Tech Stack
+
+- Next.js (App Router, TypeScript)
+- Tailwind CSS
+- Redux Toolkit + RTK Query
+- react-hook-form + zod (form validation)
+- Custom JWT auth (localStorage)
+- Native WebSocket with auto-reconnect
+
+### Pages
+
+| Route | Description |
+|-------|-------------|
+| `/auth/login` | Login page |
+| `/inbox` | Message inbox with search, bulk actions, unread indicators |
+| `/inbox/[id]` | Message detail with archive and delete |
+| `/sent` | Sent messages |
+| `/compose` | Compose a new message |
+
+### Environment Variables
+
+Create `frontend/.env.local`:
+
+```
+NEXT_PUBLIC_API_URL=http://localhost:8000
+NEXT_PUBLIC_WS_URL=ws://localhost:8000/ws/notifications/
+```
+
+These default to `localhost:8000` if not set.
