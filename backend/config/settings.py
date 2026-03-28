@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'messaging',
     'rest_framework_simplejwt.token_blacklist',
     'django_structlog',
+    'django_filters',
 ]
 
 MIDDLEWARE = [
@@ -162,6 +163,11 @@ REST_FRAMEWORK = {
         'user': '100/hour',
         'anon': '20/hour',
     },
+     'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.SearchFilter',
+        'rest_framework.filters.OrderingFilter',
+    ],
 }
 
 SIMPLE_JWT = {

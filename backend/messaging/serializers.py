@@ -6,8 +6,8 @@ class MessageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Message
-        fields = ['id', 'sender', 'recipient', 'subject', 'body', 'is_read', 'created_at']
-        read_only_fields = ['id', 'sender', 'is_read', 'created_at']
+        fields = ['id', 'sender', 'recipient', 'subject', 'body', 'is_read', 'is_archived', 'created_at']
+        read_only_fields = ['id', 'sender', 'is_read', 'is_archived', 'created_at']
 
     def validate_recipient(self, value):
         if value == self.context['request'].user:

@@ -13,24 +13,23 @@
 
 ## Phase 1: Production Hardening
 
-- [ ] Environment-based settings (django-environ or python-decouple)
-  - SECRET_KEY, DEBUG, ALLOWED_HOSTS from env vars
-- [ ] Switch to PostgreSQL
-- [ ] Switch channel layer to Redis (`channels_redis`)
-- [ ] Replace CSRF-exempt session auth with token auth (DRF TokenAuth or JWT)
-- [ ] Configure logging
-- [ ] Add pagination to message list endpoint
-- [ ] Add rate limiting (django-ratelimit or DRF throttling)
-- [ ] Write tests (models, API, WebSocket consumer)
+- [x] Environment-based settings (os.environ.get, aligned with medscout-api)
+- [x] Switch to PostgreSQL (docker-compose)
+- [x] Switch channel layer to Redis (channels_redis)
+- [x] Replace CSRF-exempt session auth with SimpleJWT (aligned with medscout-api)
+- [x] Configure logging (structlog + django-structlog)
+- [x] Add pagination to message list endpoint
+- [x] Add rate limiting (DRF throttling)
+- [x] Write tests (models, API)
 
 ## Phase 2: API Enhancements
 
-- [ ] Sent messages endpoint (GET /api/messages/sent/)
-- [ ] Bulk mark as read
-- [ ] Delete / archive messages
-- [ ] Message search and filtering (by sender, date range, read status)
-- [ ] Attachments support (file uploads)
-- [ ] Unread count endpoint
+- [x] Sent messages endpoint (GET /api/messages/sent/)
+- [x] Bulk mark as read
+- [x] Delete / archive messages
+- [x] Message search and filtering (django-filter, search, ordering)
+- [x] Unread count endpoint
+- [ ] Attachments support (file uploads) — deferred
 
 ## Phase 3: Deployment
 
