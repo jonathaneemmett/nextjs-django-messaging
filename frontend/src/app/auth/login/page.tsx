@@ -31,7 +31,7 @@ export default function LoginPage() {
 		try {
 			const tokens = await loginMutation(data).unwrap();
 			login(tokens, data.username);
-			router.push('/inbox');
+			router.push('/');
 		} catch {
 			// Error is handled by RTK Query
 		}

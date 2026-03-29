@@ -2,20 +2,26 @@
 
 import { useEffect, useRef, useCallback } from "react";
 import { useDispatch } from "react-redux";
+import { usePathname } from "next/navigation";
 import { messagesApi } from "@/api/messagesApi";
+import { showToast } from "@/components/ToastContainer";
 
 export function useWebSocket() {
   const dispatch = useDispatch();
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeout = useRef<NodeJS.Timeout | null>(null);
   const mountedRef = useRef(true);
+  const pathnameRef = useRef("/");
+  const pathname = usePathname();
+
+  useEffect(() => {
+    pathnameRef.current = pathname;
+  }, [pathname]);
 
   const connect = useCallback(() => {
-    // Don't connect if no tokens
     const tokens = localStorage.getItem("tokens");
     if (!tokens) return;
 
-    // Don't connect if already connected
     if (wsRef.current?.readyState === WebSocket.OPEN) return;
 
     const { access } = JSON.parse(tokens);
@@ -26,20 +32,29 @@ export function useWebSocket() {
     const ws = new WebSocket(wsUrl);
     wsRef.current = ws;
 
-    ws.onmessage = () => {
+    ws.onmessage = (event) => {
       dispatch(messagesApi.util.invalidateTags(["Messages", "UnreadCount"]));
+
+      const data = JSON.parse(event.data);
+      if (data.id && data.sender && data.subject) {
+        if (!pathnameRef.current.startsWith("/inbox")) {
+          showToast({
+            id: data.id,
+            sender: data.sender,
+            subject: data.subject,
+          });
+        }
+      }
     };
 
     ws.onclose = () => {
       wsRef.current = null;
-      // Only reconnect if still mounted and has tokens
       if (mountedRef.current && localStorage.getItem("tokens")) {
         reconnectTimeout.current = setTimeout(connect, 3000);
       }
     };
 
     ws.onerror = () => {
-      // Let onclose handle reconnection
       ws.close();
     };
   }, [dispatch]);
@@ -54,7 +69,7 @@ export function useWebSocket() {
         clearTimeout(reconnectTimeout.current);
       }
       if (wsRef.current) {
-        wsRef.current.onclose = null; // Prevent reconnect on unmount
+        wsRef.current.onclose = null;
         wsRef.current.close();
         wsRef.current = null;
       }
